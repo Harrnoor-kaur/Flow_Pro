@@ -12,7 +12,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 if not TOKEN:
     print("❌ Error: DISCORD_TOKEN nahi mila! Check Variables.")
 
-YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'True', 'quiet': True, 'default_search': 'auto'}
+YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'True', 'quiet': True, 'default_search': 'auto', 'cookiefile': 'cookies.txt'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 class Music(commands.Cog):
