@@ -41,29 +41,24 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             try:
-                # Step 2: Stop blocking the Event Loop! (The Main Fix)
+                # Step 2: Stop blocking the Event Loop!
                 loop = asyncio.get_event_loop()
-                
                 # Execute yt_dlp in a separate thread
                 with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
+                    # Logic Fix: Agar 'http' se shuru hai toh direct link, warna search karo
+                    query = search if search.startswith("http") else f"ytsearch:{search}"
                     info = await loop.run_in_executor(
-                        None, lambda: ydl.extract_info(f"ytsearch:{search}", download=False)
+                        None, lambda: ydl.extract_info(query, download=False)
                     )
                 
+                # Safety Check: Agar list khali hai toh crash mat ho
                 if 'entries' in info:
+                    if len(info['entries']) == 0:
+                        return await ctx.send("❌ YouTube se koi data nahi aaya (Search list khali hai).")
                     info = info['entries'][0]
                     
                 url2 = info['url']
                 title = info.get('title', 'Unknown Song')
-
-                # Step 3: Play or Queue
-                if ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
-                    self.song_queue.append((url2, title))
-                    await ctx.send(f"Added to queue: **{title}** 📥")
-                else:
-                    source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
-                    ctx.voice_client.play(source, after=lambda e: self.play_next(ctx))
-                    await ctx.send(f"🎶 Now playing: **{title}**")
 
             except Exception as e:
                 print(f"Extraction Error: {e}")
